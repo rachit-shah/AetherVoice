@@ -2,8 +2,18 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.sqlDelight)
+}
+
+sqldelight {
+    databases {
+        create("AetherVoiceDatabase") {
+            packageName.set("org.psykin.aethervoice.database")
+        }
+    }
 }
 
 kotlin {
@@ -29,11 +39,22 @@ kotlin {
     }
     
     sourceSets {
+        all {
+            languageSettings.apply {
+                optIn("kotlin.RequiresOptIn")
+                optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
+                optIn("kotlin.time.ExperimentalTime")
+            }
+        }
+
         val desktopMain by getting
         
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.coroutines.android)
+            implementation(libs.sqlDelight.android)
+            implementation(libs.ktor.client.okHttp)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -42,9 +63,21 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(libs.coroutines.core)
+            implementation(libs.sqlDelight.coroutinesExt)
+            implementation(libs.bundles.ktor.common)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.voyager.navigator)
+            implementation(libs.voyager.transitions)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
+            implementation(libs.ktor.client.okHttp)
+            implementation(libs.sqlDelight.jvm)
+        }
+        iosMain.dependencies {
+            implementation(libs.sqlDelight.native)
+            implementation(libs.ktor.client.ios)
         }
     }
 }
