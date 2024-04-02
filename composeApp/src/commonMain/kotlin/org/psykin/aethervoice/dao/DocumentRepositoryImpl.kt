@@ -1,44 +1,54 @@
 package org.psykin.aethervoice.dao
 
 import org.psykin.aethervoice.database.AetherVoiceDatabase
-import org.psykin.aethervoice.database.Document
+import org.psykin.aethervoice.helpers.getCurrentTimestampRFC3339
+import org.psykin.aethervoice.model.DocumentFormat
+import org.psykin.aethervoice.model.Document as modelDocument
 
 class DocumentRepositoryImpl(private val database: AetherVoiceDatabase) : DocumentRepository {
-    override suspend fun addDocument(document: Document) {
+    override suspend fun addDocument(document: modelDocument) {
         val currentTimestamp = getCurrentTimestampRFC3339()
         database.documentQueries.insertDocument(
             document.id,
             document.title,
             document.content,
-            document.format,
+            document.format.toString(),
             currentTimestamp,
             currentTimestamp
         )
     }
 
-    override suspend fun getDocuments(): List<Document> {
+    override suspend fun getDocuments(): List<modelDocument> {
         return database.documentQueries.selectAllDocuments().executeAsList().map { row ->
-            Document(
+            modelDocument(
                 id = row.id,
                 title = row.title,
                 content = row.content,
-                format = row.format,
+                format = DocumentFormat.valueOf(row.format),
                 createdAt = row.createdAt,
                 updatedAt = row.updatedAt
             )
         }
     }
 
-    override suspend fun getDocumentById(id: String): Document {
-        return database.documentQueries.selectDocumentById(id).executeAsOne()
+    override suspend fun getDocumentById(id: String): modelDocument {
+        val dbDoc = database.documentQueries.selectDocumentById(id).executeAsOne()
+        return modelDocument(
+            id = dbDoc.id,
+            title = dbDoc.title,
+            content = dbDoc.content,
+            format = DocumentFormat.valueOf(dbDoc.format),
+            createdAt = dbDoc.createdAt,
+            updatedAt = dbDoc.updatedAt
+        )
     }
 
-    override suspend fun updateDocument(document: Document) {
+    override suspend fun updateDocument(document: modelDocument) {
         val currentTimestamp = getCurrentTimestampRFC3339()
         database.documentQueries.updateDocument(
             document.title,
             document.content,
-            document.format,
+            document.format.toString(),
             currentTimestamp,
             document.id
         )
@@ -46,9 +56,5 @@ class DocumentRepositoryImpl(private val database: AetherVoiceDatabase) : Docume
 
     override suspend fun deleteDocument(id: String) {
         database.documentQueries.deleteDocument(id)
-    }
-
-    private fun getCurrentTimestampRFC3339(): String {
-        return kotlinx.datetime.Clock.System.now().toString()
     }
 }

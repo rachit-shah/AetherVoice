@@ -1,6 +1,6 @@
 package org.psykin.aethervoice.dao
 
-import org.psykin.aethervoice.database.Document
+import org.psykin.aethervoice.model.Document
 
 interface DocumentRepository {
     suspend fun addDocument(document: Document)

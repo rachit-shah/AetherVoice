@@ -5,6 +5,8 @@ import org.psykin.aethervoice.DatabaseDriverFactory
 import org.psykin.aethervoice.dao.DocumentRepository
 import org.psykin.aethervoice.dao.DocumentRepositoryImpl
 import org.psykin.aethervoice.database.AetherVoiceDatabase
+import org.psykin.aethervoice.parser.AndroidDocumentParser
+import org.psykin.aethervoice.parser.DocumentParser
 
 actual class AppModule(private val context: Context) {
     actual val documentRepository: DocumentRepository by lazy {
@@ -13,5 +15,8 @@ actual class AppModule(private val context: Context) {
                 driver = DatabaseDriverFactory(context).create()
             )
         )
+    }
+    actual val documentParser: DocumentParser by lazy {
+        AndroidDocumentParser(context)
     }
 }

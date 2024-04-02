@@ -1,65 +1,148 @@
 package org.psykin.aethervoice.screens
 
-import Greeting
-import aethervoice.composeapp.generated.resources.Res
-import aethervoice.composeapp.generated.resources.compose_multiplatform
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.painterResource
+import cafe.adriel.voyager.navigator.LocalNavigator
+import org.psykin.aethervoice.components.BottomUpDrawerComponent
+import org.psykin.aethervoice.components.DefaultScaffold
+import org.psykin.aethervoice.components.DocumentList
 import org.psykin.aethervoice.di.AppModule
+import org.psykin.aethervoice.dialog.AddDocumentDialog
+import org.psykin.aethervoice.dialog.RenameDocumentDialog
+import org.psykin.aethervoice.dialog.SearchDialog
+import org.psykin.aethervoice.dialog.SortOptionsDialog
+import org.psykin.aethervoice.dialog.UrlInputDialog
+import org.psykin.aethervoice.viewmodel.HomeScreenModel
 
 class HomeScreen(private val appModule: AppModule) : Screen {
 
-    @OptIn(ExperimentalResourceApi::class)
     @Composable
     override fun Content() {
-        var showContent by remember { mutableStateOf(false) }
-        val greeting = remember { Greeting().greet() }
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "Today's date is ${todaysDate()}",
-                modifier = Modifier.padding(20.dp),
-                fontSize = 24.sp,
-                textAlign = TextAlign.Center
-            )
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
+        val navigator = LocalNavigator.current ?: throw RuntimeException("Unable to get current navigator")
+        val screenModel = remember { HomeScreenModel(appModule.documentRepository, appModule.documentParser, navigator) }
+        val documents by screenModel.documents.collectAsState()
+        val searchQuery by screenModel.searchQuery.collectAsState()
+        val selectedSortOption by screenModel.selectedSortOption.collectAsState()
+        var showAddDocumentMenu by remember { mutableStateOf(false) }
+        val renameDocument by screenModel.renameDocument.collectAsState()
+        val urlInput by screenModel.urlInput.collectAsState()
+        val isSearchDialogVisible by screenModel.isSearchDialogVisible.collectAsState()
+        val isSortOptionsVisible by screenModel.isSortOptionsVisible.collectAsState()
+
+        DefaultScaffold(
+            navigator = navigator,
+            pageHeading = "Library",
+            onAddButtonClick = { showAddDocumentMenu = !showAddDocumentMenu },
+            onSearchButtonClick = { screenModel.toggleSearchDialog() },
+            onSortButtonClick = { screenModel.toggleSortOptions() }
+        ) { paddingValues ->
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                tonalElevation = 1.dp,
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.large)
+                    .padding(paddingValues)
+                    .consumeWindowInsets(paddingValues)
+            ) {
+                DocumentList(
+                    documents = documents,
+                    onItemClick = { document -> screenModel.openDocument(document) },
+                    onRenameClick = { document ->
+                        run {
+                            screenModel.setRenameDocument(document)
+                        }
+                    }
+                ) { document -> screenModel.deleteDocument(document.id) }
             }
-            AnimatedVisibility(showContent) {
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+
+            // Add Document Bottom Sheet
+            BottomUpDrawerComponent(
+                showBottomSheet = showAddDocumentMenu,
+                onShowBottomSheetChange = { showAddDocumentMenu = it },
+                onDrawerStateChange = { isActive -> showAddDocumentMenu = isActive },
+            ) {
+                AddDocumentDialog(
+                    onDismiss = { showAddDocumentMenu = false },
+                    onFileManagerClick = { screenModel.openFileManager() },
+                    onUrlWebpageClick = { screenModel.toggleUrlInput() }
+                )
+            }
+
+            // Rename Document Bottom Sheet
+            BottomUpDrawerComponent(
+                showBottomSheet = renameDocument != null,
+                onShowBottomSheetChange = { },
+                onDrawerStateChange = { },
+            ) {
+                RenameDocumentDialog(
+                    screenModel = screenModel,
+                    onDismiss = { screenModel.resetRenameDocument() }
+                ) {
+                    renameDocument?.let { it1 -> screenModel.renameDocumentTitle(it1.id, it1.title) }
+                    screenModel.resetRenameDocument()
                 }
             }
+
+            // URL Input Bottom Sheet
+            BottomUpDrawerComponent(
+                showBottomSheet = urlInput,
+                onShowBottomSheetChange = { },
+                onDrawerStateChange = { },
+            ) {
+                UrlInputDialog(
+                    onDismiss = {
+                        screenModel.toggleUrlInput()
+                        showAddDocumentMenu = false
+                    }
+                ) { url ->
+                    screenModel.parseAndAddWebpage(url)
+                    screenModel.toggleUrlInput()
+                    showAddDocumentMenu = false
+                }
+            }
+
+            // Search Bottom Sheet
+            BottomUpDrawerComponent(
+                showBottomSheet = isSearchDialogVisible,
+                onShowBottomSheetChange = { },
+                onDrawerStateChange = { },
+            ) {
+                SearchDialog(
+                    screenModel = screenModel,
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { screenModel.updateSearchQuery(it) },
+                    onDismiss = { screenModel.toggleSearchDialog() }
+                )
+            }
+
+            // Sort Options Bottom Sheet
+            BottomUpDrawerComponent(
+                showBottomSheet = isSortOptionsVisible,
+                onShowBottomSheetChange = { },
+                onDrawerStateChange = { },
+            ) {
+                SortOptionsDialog(
+                    screenModel = screenModel,
+                    selectedOption = selectedSortOption,
+                    onSortOptionSelected = { screenModel.updateSortOption(it) },
+                    onDismiss = { screenModel.toggleSortOptions() }
+                )
+            }
         }
-    }
-
-    fun todaysDate(): String {
-        fun LocalDateTime.format() = toString().substringBefore('T')
-
-        val now = Clock.System.now()
-        val zone = TimeZone.currentSystemDefault()
-        return now.toLocalDateTime(zone).format()
     }
 }
