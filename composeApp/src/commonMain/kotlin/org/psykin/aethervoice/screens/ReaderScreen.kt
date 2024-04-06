@@ -44,7 +44,7 @@ class ReaderScreen(private val document: Document) : Screen {
                         style = MaterialTheme.typography.headlineSmall
                     )
                     Text(
-                        text = document.content,
+                        text = document.content.wholeText(),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

@@ -1,5 +1,6 @@
 package org.psykin.aethervoice.dao
 
+import com.fleeksoft.ksoup.Ksoup
 import org.psykin.aethervoice.database.AetherVoiceDatabase
 import org.psykin.aethervoice.helpers.getCurrentTimestampRFC3339
 import org.psykin.aethervoice.model.DocumentFormat
@@ -11,7 +12,7 @@ class DocumentRepositoryImpl(private val database: AetherVoiceDatabase) : Docume
         database.documentQueries.insertDocument(
             document.id,
             document.title,
-            document.content,
+            document.content.html(),
             document.format.toString(),
             currentTimestamp,
             currentTimestamp
@@ -23,7 +24,7 @@ class DocumentRepositoryImpl(private val database: AetherVoiceDatabase) : Docume
             modelDocument(
                 id = row.id,
                 title = row.title,
-                content = row.content,
+                content = Ksoup.parse(row.content),
                 format = DocumentFormat.valueOf(row.format),
                 createdAt = row.createdAt,
                 updatedAt = row.updatedAt
@@ -36,7 +37,7 @@ class DocumentRepositoryImpl(private val database: AetherVoiceDatabase) : Docume
         return modelDocument(
             id = dbDoc.id,
             title = dbDoc.title,
-            content = dbDoc.content,
+            content = Ksoup.parse(dbDoc.content),
             format = DocumentFormat.valueOf(dbDoc.format),
             createdAt = dbDoc.createdAt,
             updatedAt = dbDoc.updatedAt
@@ -47,7 +48,7 @@ class DocumentRepositoryImpl(private val database: AetherVoiceDatabase) : Docume
         val currentTimestamp = getCurrentTimestampRFC3339()
         database.documentQueries.updateDocument(
             document.title,
-            document.content,
+            document.content.html(),
             document.format.toString(),
             currentTimestamp,
             document.id

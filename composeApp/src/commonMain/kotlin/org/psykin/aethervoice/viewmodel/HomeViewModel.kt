@@ -3,6 +3,7 @@ package org.psykin.aethervoice.viewmodel
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.Navigator
+import com.fleeksoft.ksoup.Ksoup
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -99,27 +100,6 @@ class HomeScreenModel(
         loadDocuments()
     }
 
-    fun addDocument() {
-        screenModelScope.launch {
-            val title = _documentTitle.value
-            if (title.isNotBlank()) {
-                val currentTimestamp = getCurrentTimestampRFC3339()
-                val document = Document(
-                    id = generateUniqueId(),
-                    title = title,
-                    content = "",
-                    format = DocumentFormat.UNKNOWN,
-                    createdAt = currentTimestamp,
-                    updatedAt = currentTimestamp,
-                    checked = false
-                )
-                documentRepository.addDocument(document)
-                _documentTitle.value = ""
-                loadDocuments()
-            }
-        }
-    }
-
     fun renameDocumentTitle(documentId: String, newTitle: String) {
         screenModelScope.launch {
             val document = _documents.value.find { it.id == documentId }
@@ -155,7 +135,7 @@ class HomeScreenModel(
             val document = Document(
                 id = generateUniqueId(),
                 title = title,
-                content = content,
+                content = Ksoup.parse(content),
                 format = getDocumentFormatFromUri(fileUri),
                 createdAt = currentTimestamp,
                 updatedAt = currentTimestamp,

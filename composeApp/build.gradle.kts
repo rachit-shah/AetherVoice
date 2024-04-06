@@ -71,13 +71,14 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.coroutines.core)
+            implementation(libs.kermit)
             implementation(libs.sqlDelight.coroutinesExt)
-            implementation(libs.swipebox)
             implementation(libs.bundles.ktor.common)
             implementation(libs.bundles.document.parsers.common)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.uuid)
             implementation(libs.bundles.voyager.common)
+            implementation(projects.thirdparty.readability)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

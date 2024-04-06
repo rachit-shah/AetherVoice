@@ -8,6 +8,9 @@ androidx-appcompat = "1.6.1"
 androidx-constraintlayout = "2.1.4"
 androidx-core-ktx = "1.12.0"
 androidx-espresso-core = "3.5.1"
+kermit = "2.0.3"
+kotlinEmotion = "11.9.3-pre.354"
+kotlinJs = "1.0.0-pre.354"
 material-icons = "1.6.4"
 androidx-material3 = "1.6.1"
 androidx-test-junit = "1.1.5"
@@ -19,7 +22,7 @@ junit = "4.13.2"
 kotlin = "1.9.22"
 ktor = "2.3.9"
 sqlDelight = "2.0.1"
-swipebox = "1.2.0"
+uri = "0.0.18"
 uuid = "0.0.25"
 voyager = "1.0.0"
 
@@ -49,6 +52,7 @@ coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", ve
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutinesVersion" }
 coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutinesVersion" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesVersion" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 kotlinx-uuid = { module = "app.softwork:kotlinx-uuid-core", version.ref = "uuid" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
@@ -64,7 +68,7 @@ sqlDelight-jvm = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "
 sqlDelight-coroutinesExt = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqlDelight" }
 sqlDelight-native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqlDelight" }
 sqlDelight-runtime = { module = "com.squareup.sqldelight:runtime", version.ref = "sqlDelight" }
-swipebox = { module = "io.github.kevinnzou:compose-swipebox-multiplatform", version.ref = "swipebox"}
+uri = { module = "com.eygraber:uri-kmp", version.ref = "uri" }
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
 voyager-screenmodel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
@@ -87,6 +91,7 @@ jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
+kotlinJs = { id = "org.jetbrains.kotlin.js", version.ref = "kotlin" }
 
 [bundles]
 ktor-common = ["ktor-client-core", "ktor-client-logging", "ktor-client-serialization", "ktor-client-contentNegotiation"]
