@@ -9,19 +9,18 @@ kotlin {
   androidTarget {
     compilations.all {
       kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "21"
       }
     }
   }
 
-  jvm()
-
-  listOf(iosX64(), iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
-    iosTarget.binaries.framework {
-      baseName = "readability"
-      isStatic = true
-    }
+  jvm() {
+    jvmToolchain(21)
   }
+
+  iosX64()
+  iosArm64()
+  iosSimulatorArm64()
 
   sourceSets {
     commonMain.dependencies {
@@ -29,6 +28,7 @@ kotlin {
       implementation(libs.uri)
     }
   }
+  task("testClasses")
 }
 
 android {

@@ -73,7 +73,6 @@ class HomeScreen(private val appModule: AppModule) : Screen {
             // Add Document Bottom Sheet
             BottomUpDrawerComponent(
                 showBottomSheet = showAddDocumentMenu,
-                onShowBottomSheetChange = { showAddDocumentMenu = it },
                 onDrawerStateChange = { isActive -> showAddDocumentMenu = isActive },
             ) {
                 AddDocumentDialog(
@@ -86,7 +85,6 @@ class HomeScreen(private val appModule: AppModule) : Screen {
             // Rename Document Bottom Sheet
             BottomUpDrawerComponent(
                 showBottomSheet = renameDocument != null,
-                onShowBottomSheetChange = { },
                 onDrawerStateChange = { },
             ) {
                 RenameDocumentDialog(
@@ -101,7 +99,6 @@ class HomeScreen(private val appModule: AppModule) : Screen {
             // URL Input Bottom Sheet
             BottomUpDrawerComponent(
                 showBottomSheet = urlInput,
-                onShowBottomSheetChange = { },
                 onDrawerStateChange = { },
             ) {
                 UrlInputDialog(
@@ -119,7 +116,6 @@ class HomeScreen(private val appModule: AppModule) : Screen {
             // Search Bottom Sheet
             BottomUpDrawerComponent(
                 showBottomSheet = isSearchDialogVisible,
-                onShowBottomSheetChange = { },
                 onDrawerStateChange = { },
             ) {
                 SearchDialog(
@@ -133,7 +129,6 @@ class HomeScreen(private val appModule: AppModule) : Screen {
             // Sort Options Bottom Sheet
             BottomUpDrawerComponent(
                 showBottomSheet = isSortOptionsVisible,
-                onShowBottomSheetChange = { },
                 onDrawerStateChange = { },
             ) {
                 SortOptionsDialog(

@@ -69,11 +69,9 @@ fun BottomRightDrawerComponent(
 @Composable
 fun BottomUpDrawerComponent(
     showBottomSheet: Boolean,
-    onShowBottomSheetChange: (Boolean) -> Unit,
     onDrawerStateChange: (Boolean) -> Unit,
     content: @Composable () -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val offset = animateDpAsState(targetValue = if (showBottomSheet) 0.dp else 500.dp)
     LaunchedEffect(showBottomSheet) {
         onDrawerStateChange(showBottomSheet)

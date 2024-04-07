@@ -1,32 +1,27 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
-    alias(libs.plugins.sqlDelight)
 }
 
-sqldelight {
-    databases {
-        create("AetherVoiceDatabase") {
-            packageName.set("org.psykin.aethervoice.database")
-        }
-    }
-    linkSqlite = true
-}
 
+@OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
     androidTarget {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "11"
+                jvmTarget = "21"
             }
         }
     }
     
-    jvm("desktop")
+    jvm("desktop") {
+        jvmToolchain(21)
+    }
     
     listOf(
         iosX64(),
@@ -38,6 +33,8 @@ kotlin {
             isStatic = true
         }
     }
+
+    compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
     
     sourceSets {
         all {
@@ -57,12 +54,12 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.coroutines.core)
             implementation(libs.coroutines.android)
-            implementation(libs.sqlDelight.android)
             implementation(libs.ktor.client.okHttp)
             implementation(libs.bundles.android.document.parsers)
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
+            api(compose.runtime)
+            implementation(project(":core:database"))
             implementation(compose.foundation)
             implementation(compose.material)
             implementation(compose.material3)
@@ -72,7 +69,6 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.coroutines.core)
             implementation(libs.kermit)
-            implementation(libs.sqlDelight.coroutinesExt)
             implementation(libs.bundles.ktor.common)
             implementation(libs.bundles.document.parsers.common)
             implementation(libs.kotlinx.datetime)
@@ -84,16 +80,22 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.coroutines.swing)
             implementation(libs.ktor.client.okHttp)
-            implementation(libs.sqlDelight.jvm)
             implementation(libs.bundles.android.document.parsers)
         }
         commonTest.dependencies {
             implementation(libs.coroutines.test)
         }
         iosMain.dependencies {
-            implementation(libs.sqlDelight.native)
             implementation(libs.ktor.client.ios)
         }
+    }
+    task("testClasses")
+    targets.filterIsInstance<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget>().forEach{
+        it.binaries.filterIsInstance<org.jetbrains.kotlin.gradle.plugin.mpp.Framework>()
+            .forEach { lib ->
+                lib.isStatic = false
+                lib.linkerOpts.add("-lsqlite3")
+            }
     }
 }
 
@@ -138,6 +140,7 @@ compose.desktop {
         mainClass = "MainKt"
 
         nativeDistributions {
+            modules("java.sql")
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "org.psykin.aethervoice"
             packageVersion = "1.0.0"
